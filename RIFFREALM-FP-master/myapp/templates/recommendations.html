@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <title>Recommendations</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: url('https://images.pexels.com/photos/13073249/pexels-photo-13073249.jpeg') no-repeat center center fixed; 
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+             background-size: cover;
+            height: 100vh;
+            margin: 0;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #FFD700;
+        }
+        
+        .favorite-artists {
+            margin-bottom: 40px;
+        }
+        
+        .favorite-artists h2 {
+            margin-bottom: 10px;
+        }
+        
+        .favorite-artists .artist {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        
+        .favorite-tracks {
+            margin-bottom: 40px;
+        }
+        
+        .favorite-tracks h2 {
+            margin-bottom: 10px;
+        }
+        
+        .favorite-tracks .track {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        
+        .track img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .artist img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        .header-container {
+            background-color: rgba(0, 0, 0, 0);
+        }
+        .sidebar {
+            width: 15%;
+            background-color: rgba(56, 56, 56, 0.199);
+            color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            height: 100vh; 
+            position: fixed;
+        }
+
+        .sidebar h3 {
+            color: #fff;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar li a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .sidebar li a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .logo{
+            background-color: #FFD700;
+            border: none;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #FFD700;
+            border: none;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color:#CDBE70;
+        }
+        .button-container {
+            text-align: right;
+        }
+        .recommended-tracks-container {
+            text-align: center;
+            color: #fff;
+        }
+    </style>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var favoritetracks = JSON.parse(localStorage.getItem('favoritetracks')) || [];
+        var favoritetracksField = document.getElementById("favoritetracksField");
+        favoritetracksField.value = JSON.stringify(favoritetracks);
+
+        var recommendForm = document.getElementById("recommendForm");
+        recommendForm.addEventListener("submit", function(event) {
+            // Ensure that the local storage data is set to the hidden input field before submitting
+            favoritetracksField.value = JSON.stringify(favoritetracks);
+        });
+    });
+    </script>
+</head>
+<body>
+    <header class="header-container">
+        <div class="sidebar">
+            <h2 class="logo">RiffRealm</h2>
+            <ul>
+                <li><a href="{% url 'Dashboard' %}">Search</a></li>
+                <li><a href="{% url 'songs' %}">Songs</a></li>
+                <li><a href="{% url 'library' %}">Library</a></li>
+                <li><a href="{% url 'recommendation' %}">Recommendations</a></li>
+            </ul>
+        </div>
+        <div class="button-container"><br>
+            <a href="{% url 'signout' %}" class="btn btn-primary">Sign Out</a>
+        </div>
+    </header>
+    <h1>Recommendations</h1>
+    <form id="recommendForm" action="{% url 'recommendation' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="favoritetracks" id="favoritetracksField">
+        <div class="button-maker" style="text-align: center;">
+            <button type="submit" class="btn btn-primary">Get Recommendations</button>
+        </div>
+    </form>
+    <div class="recommended-tracks" id="recommended-tracks-container">
+        {% if recommended_songs %}
+        <div class="recommended-tracks-container">
+            {% for song in recommended_songs %}
+            <div class="recommended-song">
+                <h2>Input Song:</h2>
+                <p><strong>Artist:</strong> {{ song.input_song.artist_name }}</p>
+                <p><strong>Song Name:</strong> {{ song.input_song.song_name }}</p>
+            </div>
+            <div class="recommended-tracks-list">
+                <h2>Recommended Tracks:</h2>
+                <ul>
+                    {% for track in song.recommended_tracks %}
+                    <li>
+                        <p><strong>Artist:</strong> {{ track.artist_name }}</p>
+                        <p><strong>Song Name:</strong> {{ track.song_name }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No recommendations available.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
